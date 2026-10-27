@@ -26,6 +26,31 @@ func SolvePartOne(intArr []int) int {
 
 }
 
+func SolvePartTwo(intArr []int) int {
+	// Follows the pattern: (n * n) - ((n - 2) * (n - 2))
+	// For n >= 3
+	// Elements in this sequence will always be divisible by 4
+	var res int
+
+	for _, num := range intArr {
+		// case: make the smallest frame
+		if num < 8 {
+			res += (8 - num)
+			continue
+		}
+
+		rem := num % 4
+		if rem == 0 {
+			continue
+		}
+
+		res += (4 - rem)
+
+	}
+
+	return res
+}
+
 func main() {
 	dataPartOne, err := common.ReadInput("inputPartOne.txt")
 	if err != nil {
@@ -33,12 +58,26 @@ func main() {
 	}
 	dataPartOne = common.TrimNewLineSuffix(dataPartOne)
 
-	intArr, err := common.ParseIntArray(dataPartOne, []byte{','})
+	intArrPartOne, err := common.ParseIntArray(dataPartOne, []byte{','})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resPartOne := SolvePartOne(intArr)
+	resPartOne := SolvePartOne(intArrPartOne)
 	fmt.Println(resPartOne)
+
+	dataPartTwo, err := common.ReadInput("inputPartTwo.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartTwo = common.TrimNewLineSuffix(dataPartTwo)
+
+	intArrPartTwo, err := common.ParseIntArray(dataPartTwo, []byte{','})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resPartTwo := SolvePartTwo(intArrPartTwo)
+	fmt.Println(resPartTwo)
 
 }
