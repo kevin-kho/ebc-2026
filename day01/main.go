@@ -51,6 +51,38 @@ func SolvePartTwo(intArr []int) int {
 	return res
 }
 
+func SolvePartThree(intArr []int) int {
+	// Pattern follows (n*n) - 1
+	var res int
+	for _, num := range intArr {
+		// case: make smallest frame
+		if num < 8 {
+			res += (8 - num)
+			continue
+		}
+
+		sq := math.Sqrt(float64(num))
+		sq = math.Ceil(sq)
+		sqInt := int(sq)
+
+		// Ensure it's an odd
+		if sqInt%2 == 0 {
+			sqInt += 1
+		}
+
+		if (sqInt*sqInt)-1 < num {
+			sqInt += 2
+		}
+
+		val := ((sqInt * sqInt) - 1) - num
+		res += val
+
+	}
+
+	return res
+
+}
+
 func main() {
 	dataPartOne, err := common.ReadInput("inputPartOne.txt")
 	if err != nil {
@@ -79,5 +111,18 @@ func main() {
 
 	resPartTwo := SolvePartTwo(intArrPartTwo)
 	fmt.Println(resPartTwo)
+
+	dataPartThree, err := common.ReadInput("inputPartThree.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartThree = common.TrimNewLineSuffix(dataPartThree)
+	intArrPartThree, err := common.ParseIntArray(dataPartThree, []byte{','})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resPartThree := SolvePartThree(intArrPartThree)
+	fmt.Println(resPartThree)
 
 }
