@@ -102,7 +102,11 @@ func SolvePartOne(entries []Entry) int {
 	}
 
 	slices.SortFunc(participants, func(a, b Participant) int {
-		return cmp.Compare(a.TotalizeTime(), b.TotalizeTime())
+		return cmp.Or(
+			cmp.Compare(len(b.Times), len(a.Times)),
+			cmp.Compare(a.TotalizeTime(), b.TotalizeTime()),
+		)
+		// return cmp.Compare(a.TotalizeTime(), b.TotalizeTime())
 	})
 
 	var res int
@@ -130,5 +134,19 @@ func main() {
 
 	resPartOne := SolvePartOne(entriesPartOne)
 	fmt.Println(resPartOne)
+
+	dataPartTwo, err := common.ReadInput("inputPartTwo.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartTwo = common.TrimNewLineSuffix(dataPartTwo)
+
+	entriesPartTwo, err := GetEntries(dataPartTwo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resPartTwo := SolvePartOne(entriesPartTwo)
+	fmt.Println(resPartTwo)
 
 }
