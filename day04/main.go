@@ -19,8 +19,17 @@ type Entry struct {
 }
 
 type Participant struct {
-	Id        int
-	TotalTime int
+	Id    int
+	Times []int
+}
+
+func (p Participant) TotalizeTime() int {
+	var res int
+	for _, t := range p.Times {
+		res += t
+	}
+
+	return res
 }
 
 func GetEntries(data []byte) ([]Entry, error) {
@@ -75,27 +84,31 @@ func GetEntries(data []byte) ([]Entry, error) {
 
 func SolvePartOne(entries []Entry) int {
 	// Entries are all quest 1
-	mp := make(map[int]int) // key: id, value: sum of times
+	mp := make(map[int]Participant) // key: id, value: sum of times
 	for _, e := range entries {
-		mp[e.Id] += e.Time
+		if _, ok := mp[e.Id]; !ok {
+			mp[e.Id] = Participant{Id: e.Id}
+		}
+
+		p := mp[e.Id]
+		p.Times = append(p.Times, e.Time)
+		mp[e.Id] = p
+
 	}
 
 	var participants []Participant
-	for id, time := range mp {
-		participants = append(participants, Participant{
-			Id:        id,
-			TotalTime: time,
-		})
+	for _, p := range mp {
+		participants = append(participants, p)
 	}
 
 	slices.SortFunc(participants, func(a, b Participant) int {
-		return cmp.Compare(a.TotalTime, b.TotalTime)
+		return cmp.Compare(a.TotalizeTime(), b.TotalizeTime())
 	})
 
 	var res int
 	i := 1
 	for _, p := range participants {
-		res += p.TotalTime * i
+		res += p.TotalizeTime() * i
 		i++
 	}
 
