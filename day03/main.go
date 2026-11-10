@@ -18,12 +18,17 @@ type Iso struct {
 
 func (i Iso) ConvertToDecimal() int {
 
+	originalStd := i.Standard
+
 	var res int
 	var pow int
 
-	for i.Standard > 0 && i.Vote > 0 {
+	for i.Vote > 0 {
 		s := i.Standard % 10
 		i.Standard /= 10
+		if i.Standard == 0 {
+			i.Standard = originalStd
+		}
 
 		v := i.Vote % 10
 		i.Vote /= 10
@@ -65,7 +70,7 @@ func CreateIsos(data []byte) ([]Iso, error) {
 
 }
 
-func SolvePartOne(isos []Iso) int {
+func Solve(isos []Iso) int {
 	var res int
 	for _, i := range isos {
 		res += i.ConvertToDecimal()
@@ -80,12 +85,26 @@ func main() {
 	}
 	dataPartOne = common.TrimNewLineSuffix(dataPartOne)
 
-	isos, err := CreateIsos(dataPartOne)
+	isosPartOne, err := CreateIsos(dataPartOne)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resPartOne := SolvePartOne(isos)
+	resPartOne := Solve(isosPartOne)
 	fmt.Println(resPartOne)
+
+	dataPartTwo, err := common.ReadInput("inputPartTwo.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartTwo = common.TrimNewLineSuffix(dataPartTwo)
+
+	isosPartTwo, err := CreateIsos(dataPartTwo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resPartTwo := Solve(isosPartTwo)
+	fmt.Println(resPartTwo)
 
 }
