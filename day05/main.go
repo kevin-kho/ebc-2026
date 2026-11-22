@@ -16,6 +16,23 @@ type Board struct {
 	Values map[models.Pos]byte
 }
 
+func (b Board) PrintGrid() {
+	var grid [][]byte
+	for range b.Y {
+		row := make([]byte, b.X)
+		grid = append(grid, row)
+	}
+
+	for pos, val := range b.Values {
+		grid[pos.Y][pos.X] = val
+	}
+
+	for _, row := range grid {
+		fmt.Println(string(row))
+	}
+
+}
+
 func CreateBoard(data []byte) Board {
 	res := Board{
 		Values: map[models.Pos]byte{},
@@ -142,6 +159,8 @@ func SolvePartOne(board Board) int {
 			ct++
 		}
 	}
+
+	board.PrintGrid()
 
 	return ct
 
