@@ -49,7 +49,9 @@ func GetAllDir() []models.Pos {
 
 }
 
-func SolvePartOne(board Board) int {
+// Might change it to receiver function
+func MapOutLand(board Board) Board {
+
 	start := models.Pos{X: board.X / 2, Y: board.Y / 2}
 	board.Values[start] = '#'
 
@@ -120,7 +122,21 @@ func SolvePartOne(board Board) int {
 
 	}
 
-	return len(mp)
+	return board
+
+}
+
+func SolvePartOne(board Board) int {
+
+	board = MapOutLand(board)
+	var ct int
+	for _, val := range board.Values {
+		if val == '#' {
+			ct++
+		}
+	}
+
+	return ct
 
 }
 
