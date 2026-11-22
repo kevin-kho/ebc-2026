@@ -50,7 +50,7 @@ func GetAllDir() []models.Pos {
 }
 
 // Might change it to receiver function
-func MapOutLand(board Board) Board {
+func MapOutLandAndWater(board Board) Board {
 
 	start := models.Pos{X: board.X / 2, Y: board.Y / 2}
 	board.Values[start] = '#'
@@ -118,8 +118,15 @@ func MapOutLand(board Board) Board {
 		}
 
 		mp = newMp
-		// break
 
+	}
+
+	// Turn the rest into water
+	for pos, val := range board.Values {
+		if val == '#' {
+			continue
+		}
+		board.Values[pos] = '.'
 	}
 
 	return board
@@ -128,7 +135,7 @@ func MapOutLand(board Board) Board {
 
 func SolvePartOne(board Board) int {
 
-	board = MapOutLand(board)
+	board = MapOutLandAndWater(board)
 	var ct int
 	for _, val := range board.Values {
 		if val == '#' {
