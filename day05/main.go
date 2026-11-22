@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"maps"
 
 	"github.com/kevin-kho/aoc-utilities/common"
 	"github.com/kevin-kho/aoc-utilities/models"
@@ -21,8 +22,8 @@ func CreateBoard(data []byte) Board {
 	}
 
 	arr := bytes.Split(data, []byte{'\n'})
-	res.X = len(arr)
-	res.Y = len(arr[0])
+	res.Y = len(arr)
+	res.X = len(arr[0])
 
 	for y, row := range bytes.Split(data, []byte{'\n'}) {
 		for x, val := range row {
@@ -48,6 +49,81 @@ func GetAllDir() []models.Pos {
 
 }
 
+func SolvePartOne(board Board) int {
+	start := models.Pos{X: board.X / 2, Y: board.Y / 2}
+	board.Values[start] = '#'
+
+	// set of all land
+	// will use to check if any land changes
+	mp := map[models.Pos]bool{start: true}
+
+	var queue []models.Pos // should only contain non #
+
+	for true {
+		newMp := maps.Clone(mp)
+
+		// populate queue with 1 and 0s
+		for pos := range mp {
+			for _, d := range GetAllDir() {
+				newX := pos.X + d.X
+				newY := pos.Y + d.Y
+
+				// skip out of bounds
+				if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) {
+					continue
+				}
+				adjPos := models.Pos{X: newX, Y: newY}
+
+				// skip adj #
+				if board.Values[adjPos] == '#' {
+					continue
+				}
+				queue = append(queue, adjPos)
+			}
+		}
+
+		// BFS the queue
+		for range len(queue) {
+			pos := queue[0]
+			queue = queue[1:]
+			var ct int
+
+			for _, d := range GetAllDir() {
+				newX := pos.X + d.X
+				newY := pos.Y + d.Y
+
+				// skip out of bounds
+				if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) {
+					continue
+				}
+
+				newPos := models.Pos{X: newX, Y: newY}
+
+				if board.Values[newPos] == '#' || board.Values[newPos] == '1' {
+					ct++
+				}
+			}
+
+			if ct >= 5 {
+				newMp[pos] = true
+				board.Values[pos] = '#'
+			}
+		}
+
+		// No new land
+		if maps.Equal(mp, newMp) {
+			break
+		}
+
+		mp = newMp
+		// break
+
+	}
+
+	return len(mp)
+
+}
+
 func main() {
 	dataPartOne, err := common.ReadInput("inputPartOne.txt")
 	if err != nil {
@@ -56,6 +132,8 @@ func main() {
 	dataPartOne = common.TrimNewLineSuffix(dataPartOne)
 
 	boardPartOne := CreateBoard(dataPartOne)
-	fmt.Println(boardPartOne)
+
+	resPartOne := SolvePartOne(boardPartOne)
+	fmt.Println(resPartOne)
 
 }
