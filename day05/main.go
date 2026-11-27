@@ -66,6 +66,23 @@ func GetAllDir() []models.Pos {
 
 }
 
+func GetTreeDirs() []models.Pos {
+	var res []models.Pos
+	for x := -2; x < 3; x++ {
+		for y := -2; y < 3; y++ {
+			if x == 0 && y == 0 {
+				continue
+			}
+			if common.IntAbs(x) == 2 && common.IntAbs(y) == 2 {
+				continue
+			}
+			res = append(res, models.Pos{X: x, Y: y})
+		}
+	}
+
+	return res
+}
+
 // Might change it to receiver function
 func MapOutLandAndWater(board Board) Board {
 
@@ -205,6 +222,70 @@ func MapOutShore(board Board) Board {
 	return board
 }
 
+func MapOutTrees(board Board) Board {
+	// dirs := GetAllDir()
+
+	// set initial forest
+	for pos, val := range board.Values {
+		if val != '#' {
+			continue
+		}
+
+		valid := true
+		for _, d := range GetTreeDirs() {
+			newX := pos.X + d.X
+			newY := pos.Y + d.Y
+
+			if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) {
+				valid = false
+				continue
+			}
+			nei := board.Values[models.Pos{X: newX, Y: newY}]
+			if nei == '.' || nei == '=' {
+				valid = false
+			}
+		}
+		if valid {
+			board.Values[pos] = '@'
+		}
+
+	}
+
+	// grow forest
+	for range 2 {
+		newMp := maps.Clone(board.Values)
+		for pos, val := range board.Values {
+			if val != '#' {
+				continue
+			}
+			var ct int
+			var sand bool
+
+			for _, d := range GetAllDir() {
+				newX := pos.X + d.X
+				newY := pos.Y + d.Y
+
+				if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) {
+					continue
+				}
+				nei := board.Values[models.Pos{X: newX, Y: newY}]
+				switch nei {
+				case '=':
+					sand = true
+				case '@':
+					ct++
+				}
+			}
+			if ct >= 4 && !sand {
+				newMp[pos] = '@'
+			}
+		}
+		board.Values = newMp
+	}
+
+	return board
+}
+
 func SolvePartOne(board Board) int {
 
 	board = MapOutLandAndWater(board)
@@ -236,6 +317,22 @@ func SolvePartTwo(board Board) int {
 
 }
 
+func SolvePartThree(board Board) int {
+	board = MapOutLandAndWater(board)
+	board = MapOutShore(board)
+	board = MapOutTrees(board)
+
+	board.PrintGrid()
+	var ct int
+	for _, val := range board.Values {
+		if val == '@' {
+			ct++
+		}
+	}
+
+	return ct
+}
+
 func main() {
 	dataPartOne, err := common.ReadInput("inputPartOne.txt")
 	if err != nil {
@@ -257,5 +354,15 @@ func main() {
 
 	resPartTwo := SolvePartTwo(boardPartTwo)
 	fmt.Println(resPartTwo)
+
+	dataPartThree, err := common.ReadInput("inputPartThree.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartThree = common.TrimNewLineSuffix(dataPartThree)
+	boardPartThree := CreateBoard(dataPartThree)
+
+	resPartThree := SolvePartThree(boardPartThree)
+	fmt.Println(resPartThree)
 
 }
