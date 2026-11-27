@@ -150,6 +150,61 @@ func MapOutLandAndWater(board Board) Board {
 
 }
 
+func MapOutShore(board Board) Board {
+	dirs := GetAllDir()
+
+	// set initial shore
+	for pos, val := range board.Values {
+		if val != '#' {
+			continue
+		}
+		var ct int
+		for _, d := range dirs {
+			newX := pos.X + d.X
+			newY := pos.Y + d.Y
+			if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) || board.Values[models.Pos{X: newX, Y: newY}] == '.' {
+				ct++
+			}
+		}
+		if ct > 0 {
+			board.Values[pos] = '='
+		}
+	}
+
+	for true {
+		newMp := maps.Clone(board.Values)
+
+		for pos, val := range board.Values {
+			if val != '#' {
+				continue
+			}
+
+			var ct int
+			for _, d := range dirs {
+				newX := pos.X + d.X
+				newY := pos.Y + d.Y
+				if !(0 <= newX && newX < board.X) || !(0 <= newY && newY < board.Y) {
+					continue
+				}
+				if board.Values[models.Pos{X: newX, Y: newY}] == '=' {
+					ct++
+				}
+			}
+
+			if ct >= 5 {
+				newMp[pos] = '='
+			}
+		}
+
+		if maps.Equal(board.Values, newMp) {
+			break
+		}
+		board.Values = newMp
+	}
+
+	return board
+}
+
 func SolvePartOne(board Board) int {
 
 	board = MapOutLandAndWater(board)
@@ -166,6 +221,21 @@ func SolvePartOne(board Board) int {
 
 }
 
+func SolvePartTwo(board Board) int {
+	board = MapOutLandAndWater(board)
+	board = MapOutShore(board)
+
+	var ct int
+	for _, val := range board.Values {
+		if val == '=' {
+			ct++
+		}
+	}
+	board.PrintGrid()
+	return ct
+
+}
+
 func main() {
 	dataPartOne, err := common.ReadInput("inputPartOne.txt")
 	if err != nil {
@@ -177,5 +247,15 @@ func main() {
 
 	resPartOne := SolvePartOne(boardPartOne)
 	fmt.Println(resPartOne)
+
+	dataPartTwo, err := common.ReadInput("inputPartTwo.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataPartTwo = common.TrimNewLineSuffix(dataPartTwo)
+	boardPartTwo := CreateBoard(dataPartTwo)
+
+	resPartTwo := SolvePartTwo(boardPartTwo)
+	fmt.Println(resPartTwo)
 
 }
